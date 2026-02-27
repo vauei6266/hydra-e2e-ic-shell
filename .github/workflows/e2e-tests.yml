@@ -1,0 +1,24 @@
+name: E2E Tests
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  e2e:
+    if: contains(github.event.comment.body, '/e2e')
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Setup environment
+        run: ./scripts/setup-env.sh
+      - name: Run E2E
+        run: |
+          ./scripts/test.sh
+          make test-e2e
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
